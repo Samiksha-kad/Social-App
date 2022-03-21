@@ -92,10 +92,10 @@ export const getPostOfFollowing = (async (req, res, next) => {
             owner: {
                 $in: loginUser.following
             }
-        })
-        console.log(getPost, "getpost")
+        }).populate("owner likes comments.user")
+        let getPostData = getPost.reverse()
 
-        sendPost(getPost, 202, res)
+        sendPost(getPostData, 202, res)
 
     }
     catch (error) {
@@ -174,16 +174,21 @@ export const deleteComment = (async (req, res, next) => {
     try {
         const post = await postModel.findById(req.params.id)
 
+        console.log(req, "dlt")
         if (!post) {
             next(new ErrorHandler("post not found", 404));
+            return
         }
 
-        if (!req.body.commentId) {
-            next(new ErrorHandler("comment not found", 404));
 
-        }
 
         if (post.owner.toString() === req.user._id.toString()) { //login user who posted post
+            if (req.body.commentId === undefined) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Comment Id is required",
+                });
+            }
             post.comments.forEach((item, index) => {
                 if (item._id.toString() === req.body.commentId.toString()) {
                     return post.comments.splice(index, 1)
@@ -192,9 +197,12 @@ export const deleteComment = (async (req, res, next) => {
 
             await post.save();
             next(new ErrorHandler("selected comment  deleted succesfully", 200));
+            return
 
 
         }
+
+
         else { //user who commented on post
             post.comments.forEach((item, index) => {
                 if (item.user.toString() === req.user._id.toString()) {
@@ -204,6 +212,24 @@ export const deleteComment = (async (req, res, next) => {
             await post.save();
             next(new ErrorHandler(" your comment deleted succesfully", 200));
         }
+
+    }
+    catch (error) {
+        next(new ErrorHandler(error.message, 500));
+    }
+})
+
+export const getMyposts = (async (req, res, next) => {
+    try {
+        const user = await userModel.findById(req.user._id)
+        const post = []
+
+        for (let i = 0; i < user.posts.length; i++) {
+            const postsData = await postModel.findById(user.posts[i]).populate("likes comments.user")
+            post.push(postsData)
+
+        }
+        sendPost(post, 202, res)
 
     }
     catch (error) {

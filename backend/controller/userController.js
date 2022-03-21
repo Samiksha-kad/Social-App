@@ -201,7 +201,7 @@ export const deleteMyProfile = (async (req, res, next) => {
 
 export const myProfile = (async (req, res, next) => {
     try {
-        const user = await userModel.findById(req.user._id).populate("posts")
+        const user = await userModel.findById(req.user._id).populate("posts followers following")
         sendPost(user, 202, res)
 
     }
@@ -211,7 +211,7 @@ export const myProfile = (async (req, res, next) => {
 })
 export const getUserProfile = (async (req, res, next) => {
     try {
-        const user = await userModel.findById(req.params.id).populate("posts")
+        const user = await userModel.findById(req.params.id).populate("posts followers following")
         if (!user) {
             next(new ErrorHandler("user not found", 404));
         }

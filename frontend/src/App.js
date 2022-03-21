@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 import { loadUser } from './Actions/userActions'
 import { Home } from './Components/Home/Home';
+import Account from './Components/Account/Account';
 
 function App() {
   const dispatch = useDispatch();
@@ -18,9 +19,8 @@ function App() {
         {isAuthenticated && <Header />}
 
         <Routes>
-
-
-          <Route path="/" element={isAuthenticated ? <Login /> : <Home />} />
+          <Route path="/" element={isAuthenticated ? <Home /> : <Login />} />
+          <Route path="/account" element={isAuthenticated ? <Account /> : <Login />} />
           {/* <Route path="/registration" element={<Registration />} />
               <Route path="/" element={<Dashboard />} />
               <Route path="/create" element={<PaperMaker />} />
